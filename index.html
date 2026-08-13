@@ -6,74 +6,66 @@
     <title>ARN Coffee Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #e5e5e5; }
-        .glass { background: rgba(23, 23, 23, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .recipe-done { opacity: 0.3; filter: grayscale(1); transform: scale(0.96); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e5e5e5; }
+        .glass { background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .recipe-done { opacity: 0.25; filter: grayscale(1); transform: scale(0.97); }
         .accent-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-        .btn-active { transform: scale(0.95); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .detail-grid-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-40">
 
-    <!-- Sticky Header -->
-    <div class="sticky top-0 z-30 px-4 py-5 glass border-b border-white/5 shadow-2xl">
+    <!-- Header Section -->
+    <div class="sticky top-0 z-30 px-4 py-5 glass border-b border-white/5">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-800 tracking-tighter text-white">
-                    ARN <span class="text-amber-500">COFFEE</span>
-                </h1>
-                <p class="text-[9px] text-amber-500/50 font-bold uppercase tracking-[0.2em]">Calculator & Tracker</p>
+                <h1 class="text-xl font-800 tracking-tighter text-white">ARN <span class="text-amber-500">COFFEE</span></h1>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">System Active</p>
+                </div>
             </div>
-            <button onclick="resetAll()" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest hover:bg-red-500 hover:text-white transition-all">
-                CLEAR ALL
-            </button>
+            <button onclick="resetAll()" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black border border-red-500/20">RESET</button>
         </div>
 
-        <!-- Portafilter Pull Section (Primary Focus) -->
+        <!-- Portafilter Pull Tracker -->
         <div class="max-w-md mx-auto mt-6 grid grid-cols-3 gap-3">
-            <div class="col-span-2 bg-amber-500 rounded-2xl p-4 shadow-[0_10px_30px_rgba(245,158,11,0.2)] relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-[10px] font-black text-amber-900 uppercase mb-1">Total Ekstraksi (Pulls)</p>
-                    <div class="flex items-baseline gap-2">
-                        <span id="global-pulls" class="text-5xl font-800 text-amber-950">0</span>
-                        <span class="text-xs font-bold text-amber-900 uppercase">Kali Tarik</span>
-                    </div>
-                    <p class="text-[9px] text-amber-800 mt-1 font-bold">*Pembulatan ke atas (Safety Yield)</p>
+            <div class="col-span-2 accent-gradient rounded-[2rem] p-5 shadow-2xl relative overflow-hidden">
+                <p class="text-[10px] font-black text-amber-950 uppercase opacity-80">Total Espresso Pulls</p>
+                <div class="flex items-baseline gap-2">
+                    <span id="global-pulls" class="text-6xl font-800 text-amber-950">0</span>
+                    <span class="text-sm font-black text-amber-900 uppercase">Kali Tarik</span>
                 </div>
-                <i data-lucide="coffee" class="absolute -right-2 -bottom-2 w-20 h-20 text-amber-600/30 rotate-12"></i>
+                <p class="text-[8px] text-amber-900 font-bold mt-1">*Selalu pembulatan ke atas</p>
             </div>
-            <div class="bg-white/5 rounded-2xl p-4 border border-white/10 flex flex-col justify-center items-center">
-                <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 text-center leading-tight">Target Yield<br>per Pull</p>
+            <div class="bg-white/5 rounded-[2rem] p-4 border border-white/10 flex flex-col justify-center items-center">
+                <p class="text-[9px] font-bold text-gray-500 uppercase mb-1">Yield/Shot</p>
                 <div class="flex items-center">
                     <input type="number" id="yield-setting" value="35" oninput="render()" 
-                           class="bg-transparent text-2xl font-800 text-white w-12 text-center focus:outline-none">
+                           class="bg-transparent text-2xl font-800 text-amber-500 w-10 text-center focus:outline-none">
                     <span class="text-xs font-bold text-gray-500">g</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <main class="px-4 max-w-md mx-auto mt-6 space-y-4">
-        <div class="flex justify-between items-center px-1">
-            <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Antrian Produksi</h2>
-            <div id="active-count" class="text-[10px] bg-white/10 px-2 py-1 rounded-md text-gray-400 font-bold">0 MENU</div>
-        </div>
+    <main class="px-4 max-w-md mx-auto mt-8 space-y-6">
+        <h2 class="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em] ml-2">Daftar Menu</h2>
         
-        <!-- Recipe List -->
         <div id="recipe-list" class="space-y-4">
-            <!-- Render JS -->
+            <!-- Render via JS -->
         </div>
 
-        <!-- Global Summary -->
-        <div class="mt-10 p-6 rounded-[2.5rem] bg-[#111] border border-white/5 shadow-2xl">
-            <h3 class="text-xs font-black mb-6 flex items-center gap-2 text-gray-400 uppercase tracking-[0.2em]">
-                <i data-lucide="layers" class="w-4 h-4 text-amber-500"></i> Logistik Bahan
+        <!-- Total Logistik -->
+        <div id="inventory-section" class="mt-12 p-8 rounded-[3rem] bg-gradient-to-b from-[#111] to-[#050505] border border-white/5 shadow-2xl">
+            <h3 class="text-xs font-black mb-8 flex items-center gap-3 text-gray-400 uppercase tracking-widest">
+                <i data-lucide="box" class="w-4 h-4 text-amber-500"></i> Total Bahan Kumulatif
             </h3>
-            <div id="global-ingredients" class="space-y-3">
-                <!-- Render JS -->
+            <div id="global-ingredients" class="space-y-4">
+                <!-- Render via JS -->
             </div>
         </div>
     </main>
@@ -103,7 +95,7 @@
         }
 
         function resetAll() {
-            if(confirm("Reset semua hitungan ARN Coffee?")) {
+            if(confirm("Hapus semua data produksi ARN?")) {
                 Object.keys(orders).forEach(k => { orders[k] = 0; completed[k] = false; });
                 render();
             }
@@ -112,63 +104,74 @@
         function render() {
             const yieldVal = parseFloat(document.getElementById('yield-setting').value) || 35;
             const listEl = document.getElementById('recipe-list');
-            let globalEspresso = 0, globalTotalPulls = 0, activeMenuCount = 0;
-            let inv = { "Susu Fresh": 0, "Susu Evap": 0, "Gula Aren": 0, "Syrup": 0, "Matcha": 0, "Berry Juice": 0, "Gula Pasir": 0, "Air Hangat (Matcha)": 0, "Air (Berry)": 0 };
+            let globalEspresso = 0, globalTotalPulls = 0;
+            let inv = { "Espresso": 0, "Susu Fresh": 0, "Susu Evap": 0, "Gula Aren": 0, "Syrup": 0, "Matcha Powder": 0, "Berry Juice": 0, "Gula Pasir": 0, "Air Hangat": 0, "Air Biasa": 0 };
 
             listEl.innerHTML = recipes.map(r => {
                 const qty = orders[r.id];
                 const isDone = completed[r.id];
                 const active = qty > 0;
-                if (active) activeMenuCount++;
                 
                 const bEsp = r.esp * qty;
-                const bPulls = Math.ceil(bEsp / yieldVal); // PEMBULATAN KE ATAS
+                const bPulls = Math.ceil(bEsp / yieldVal);
 
                 if (active && !isDone) {
                     globalEspresso += bEsp;
                     globalTotalPulls += bPulls;
+                    inv["Espresso"] += bEsp;
                     inv["Susu Fresh"] += r.susu * qty;
                     inv["Susu Evap"] += r.evap * qty;
                     inv["Gula Aren"] += r.arn * qty;
                     inv["Syrup"] += r.srp * qty;
-                    inv["Matcha"] += r.mth * qty;
+                    inv["Matcha Powder"] += r.mth * qty;
                     inv["Berry Juice"] += r.berry * qty;
                     inv["Gula Pasir"] += r.gul * qty;
-                    inv["Air Hangat (Matcha)"] += r.id === 5 ? r.air * qty : 0;
-                    inv["Air (Berry)"] += r.id === 1 ? r.air * qty : 0;
+                    if(r.id === 5) inv["Air Hangat"] += r.air * qty;
+                    if(r.id === 1) inv["Air Biasa"] += r.air * qty;
                 }
 
                 return `
-                <div class="transition-all duration-300 ${isDone ? 'recipe-done' : ''}">
-                    <div class="glass rounded-[2rem] p-5 ${active && !isDone ? 'border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.05)]' : ''}">
-                        <div class="flex items-center justify-between">
+                <div class="${isDone ? 'recipe-done' : ''} transition-all duration-500">
+                    <div class="glass rounded-[2.5rem] p-6 ${active && !isDone ? 'border-amber-500/40 shadow-2xl shadow-amber-900/10' : ''}">
+                        <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${active ? 'accent-gradient shadow-lg shadow-amber-600/20' : 'bg-white/5 text-gray-600'}">
-                                    <i data-lucide="${r.icon}" class="${active ? 'text-amber-950' : ''}"></i>
+                                <div class="w-14 h-14 rounded-3xl flex items-center justify-center ${active ? 'accent-gradient text-amber-950' : 'bg-white/5 text-gray-600'}">
+                                    <i data-lucide="${r.icon}" class="w-6 h-6"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-sm tracking-tight ${active ? 'text-white' : 'text-gray-500'}">${r.name}</h3>
-                                    <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest">${r.esp > 0 ? r.esp+'g Espresso' : 'Non-Coffee'}</p>
+                                    <h3 class="font-800 text-base text-white tracking-tight">${r.name}</h3>
+                                    <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest">${r.esp > 0 ? r.esp+'g Espresso / porsi' : 'Non-Coffee'}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3 bg-black rounded-xl p-1 border border-white/5">
-                                <button onclick="updateQty(${r.id}, -1)" class="w-8 h-8 rounded-lg text-gray-500 font-bold hover:text-white">-</button>
-                                <span class="w-4 text-center font-800 text-sm text-white">${qty}</span>
-                                <button onclick="updateQty(${r.id}, 1)" class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 font-bold">+</button>
+                            <div class="flex items-center gap-4 bg-black/50 rounded-2xl p-2 border border-white/5">
+                                <button onclick="updateQty(${r.id}, -1)" class="w-8 h-8 rounded-xl text-gray-500 font-bold hover:text-white">-</button>
+                                <span class="w-4 text-center font-800 text-amber-500">${qty}</span>
+                                <button onclick="updateQty(${r.id}, 1)" class="w-8 h-8 rounded-xl bg-amber-500 text-amber-950 font-black">+</button>
                             </div>
                         </div>
 
                         ${active ? `
-                        <div class="mt-5 pt-5 border-t border-white/5">
-                            <div class="grid grid-cols-2 gap-2 mb-4">
-                                ${r.esp > 0 ? `<div class="bg-black/40 p-3 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Batch Espresso</p><p class="text-sm font-bold text-white">${bEsp}g <span class="text-amber-500 text-[10px]">(${bPulls} Pulls)</span></p></div>` : ''}
-                                ${r.mth > 0 ? `<div class="bg-black/40 p-3 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Batch Matcha</p><p class="text-sm font-bold text-green-500">${r.mth*qty}g</p></div>` : ''}
-                                ${r.susu > 0 ? `<div class="bg-black/40 p-3 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">Total Susu</p><p class="text-sm font-bold text-white">${(r.susu+r.evap)*qty}g</p></div>` : ''}
-                                ${r.air > 0 ? `<div class="bg-black/40 p-3 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 font-black uppercase mb-1">${r.id === 5 ? 'Air Hangat' : 'Air'}</p><p class="text-sm font-bold text-white">${r.air*qty}g</p></div>` : ''}
+                        <div class="mt-6 pt-6 border-t border-white/5 animate-in slide-in-from-top-4 duration-300">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-[10px] font-black text-gray-500 uppercase">Detail Batch Untuk ${qty} Botol</span>
+                                ${r.esp > 0 ? `<span class="bg-amber-500/10 text-amber-500 px-3 py-1 rounded-full text-[10px] font-black">${bPulls} SHOTS</span>` : ''}
                             </div>
-                            <button onclick="toggleDone(${r.id})" class="w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] tracking-widest transition-all ${isDone ? 'bg-green-500/20 text-green-500' : 'bg-white/5 text-gray-400 hover:bg-white/10'}">
+                            
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                ${r.esp > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Espresso</p><p class="font-bold text-white">${bEsp}g</p></div>` : ''}
+                                ${r.susu > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Susu Fresh</p><p class="font-bold text-white">${r.susu*qty}g</p></div>` : ''}
+                                ${r.evap > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Evaporasi</p><p class="font-bold text-white">${r.evap*qty}g</p></div>` : ''}
+                                ${r.arn > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Gula Aren</p><p class="font-bold text-amber-500">${r.arn*qty}g</p></div>` : ''}
+                                ${r.srp > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Syrup</p><p class="font-bold text-purple-400">${r.srp*qty}g</p></div>` : ''}
+                                ${r.berry > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Berry Juice</p><p class="font-bold text-pink-500">${r.berry*qty}g</p></div>` : ''}
+                                ${r.mth > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Matcha</p><p class="font-bold text-green-500">${r.mth*qty}g</p></div>` : ''}
+                                ${r.gul > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">Gula Pasir</p><p class="font-bold text-white">${r.gul*qty}g</p></div>` : ''}
+                                ${r.air > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[9px] text-gray-500 font-black uppercase">${r.id === 5 ? 'Air Hangat' : 'Air'}</p><p class="font-bold text-blue-400">${r.air*qty}g</p></div>` : ''}
+                            </div>
+
+                            <button onclick="toggleDone(${r.id})" class="w-full mt-5 py-4 rounded-[1.5rem] flex items-center justify-center gap-3 font-black text-[11px] tracking-[0.1em] transition-all ${isDone ? 'bg-green-500/20 text-green-500 border border-green-500/30' : 'bg-white/5 text-gray-400 border border-white/10'}">
                                 <i data-lucide="${isDone ? 'check-circle' : 'circle'}" class="w-4 h-4"></i>
-                                ${isDone ? 'PROSES SELESAI' : 'TANDAI SELESAI'}
+                                ${isDone ? 'PESANAN INI SELESAI' : 'TANDAI SELESAI'}
                             </button>
                         </div>
                         ` : ''}
@@ -178,23 +181,25 @@
             }).join('');
 
             document.getElementById('global-pulls').innerText = globalTotalPulls;
-            document.getElementById('active-count').innerText = activeMenuCount + " MENU";
             
             const invEl = document.getElementById('global-ingredients');
             const items = Object.entries(inv).filter(([_, v]) => v > 0);
             
             if (items.length === 0) {
-                invEl.innerHTML = `<p class="text-gray-600 text-xs italic text-center py-4">Belum ada antrian bahan...</p>`;
+                invEl.innerHTML = `<p class="text-gray-600 text-xs italic text-center py-8">Belum ada pesanan aktif...</p>`;
             } else {
                 invEl.innerHTML = items.map(([name, val]) => `
-                    <div class="flex justify-between items-center py-2 border-b border-white/5">
-                        <span class="text-[11px] text-gray-500 font-bold uppercase tracking-tight">${name}</span>
-                        <span class="text-sm font-bold text-white">${val}<small class="ml-1 text-gray-600 italic">g</small></span>
+                    <div class="flex justify-between items-center py-3 border-b border-white/5">
+                        <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">${name}</span>
+                        <span class="text-base font-800 text-white">${val}<small class="ml-1 text-gray-600">g</small></span>
                     </div>
                 `).join('') + `
-                    <div class="mt-4 p-4 accent-gradient rounded-2xl flex justify-between items-center">
-                        <span class="text-xs font-black text-amber-950 uppercase">Total Espresso Cair</span>
-                        <span class="text-xl font-900 text-amber-950">${globalEspresso}g</span>
+                    <div class="mt-8 p-6 accent-gradient rounded-[2rem] flex justify-between items-center shadow-2xl">
+                        <div>
+                            <p class="text-[10px] font-black text-amber-950 uppercase opacity-70">Total Espresso Cair</p>
+                            <p class="text-3xl font-900 text-amber-950">${globalEspresso}g</p>
+                        </div>
+                        <i data-lucide="coffee" class="w-10 h-10 text-amber-950/20"></i>
                     </div>
                 `;
             }
