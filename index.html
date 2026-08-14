@@ -2,214 +2,441 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ARN Coffee Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Kalkulator produksi batch untuk barista ARN Coffee — hitung kebutuhan bahan dan pulls espresso secara instan.">
+    <title>ARN Coffee — Efficiency Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e5e5e5; }
-        .glass { background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+
+        .glass {
+            background: rgba(18, 18, 18, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
         .recipe-done { opacity: 0.25; filter: grayscale(1); transform: scale(0.97); }
+
         .accent-gradient { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-        .detail-grid-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
-        /* Hilangkan highlight biru saat tap di HP */
+
+        .detail-grid-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* Tap highlight suppression */
         * { -webkit-tap-highlight-color: transparent; }
+
+        /* Card border transition */
+        .recipe-card-inner {
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: border-color 0.3s ease, opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
+        }
+        .recipe-card-inner.is-active {
+            border-color: rgba(245, 158, 11, 0.30);
+        }
+
+        /* Detail reveal animation — CSS only, no plugin needed */
+        .detail-panel {
+            animation: detail-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+            transform-origin: top center;
+        }
+        @keyframes detail-in {
+            from { opacity: 0; transform: scaleY(0.94); }
+            to   { opacity: 1; transform: scaleY(1); }
+        }
+
+        /* Focus ring — visible on keyboard, invisible on touch */
+        :focus-visible {
+            outline: 2px solid #f59e0b;
+            outline-offset: 2px;
+            border-radius: 8px;
+        }
+
+        /* Stepper button states */
+        .btn-minus {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: transparent;
+            color: #9ca3af;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.375rem; font-weight: 700;
+            transition: background 0.15s, transform 0.1s, color 0.15s;
+            border: none; cursor: pointer;
+        }
+        .btn-minus:active { background: rgba(255,255,255,0.06); transform: scale(0.92); }
+
+        .btn-plus {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: #f59e0b;
+            color: #451a03;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.375rem; font-weight: 900;
+            transition: background 0.15s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.40);
+            border: none; cursor: pointer;
+        }
+        .btn-plus:hover { background: #fbbf24; }
+        .btn-plus:active { transform: scale(0.92); box-shadow: none; }
+
+        /* Yield stepper buttons */
+        .btn-yield {
+            width: 100%; padding: 10px 0;
+            background: transparent; border: none; cursor: pointer;
+            color: #f59e0b;
+            display: flex; justify-content: center;
+            border-radius: 10px;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .btn-yield:hover  { background: rgba(255,255,255,0.04); }
+        .btn-yield:active { background: rgba(255,255,255,0.07); transform: scale(0.96); }
+
+        /* Reset button */
+        .btn-reset {
+            background: rgba(239,68,68,0.10);
+            color: #ef4444;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 10px; font-weight: 900;
+            border: 1px solid rgba(239,68,68,0.22);
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            min-height: 44px;
+        }
+        .btn-reset:hover  { background: rgba(239,68,68,0.17); }
+        .btn-reset:active { transform: scale(0.95); }
+
+        /* Done button */
+        .btn-done {
+            width: 100%; padding: 16px 24px;
+            border-radius: 1.5rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 10px; font-weight: 900;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.05);
+            color: #d1d5db;
+            min-height: 52px;
+        }
+        .btn-done:hover  { background: rgba(255,255,255,0.09); }
+        .btn-done:active { transform: scale(0.98); }
+        .btn-done.is-done {
+            background: rgba(34,197,94,0.18);
+            color: #4ade80;
+            border-color: rgba(34,197,94,0.22);
+        }
+
+        /* Reset confirmation overlay */
+        .reset-overlay {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex; align-items: flex-end; justify-content: center;
+            padding: 0 16px 32px;
+            animation: overlay-in 0.2s ease both;
+        }
+        @keyframes overlay-in {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .reset-sheet {
+            width: 100%; max-width: 448px;
+            background: rgba(22,22,22,0.98);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 2rem;
+            padding: 28px 24px 24px;
+            animation: sheet-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes sheet-in {
+            from { transform: translateY(40px); opacity: 0; }
+            to   { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
-<body class="pb-40">
+<body class="pb-20">
 
-    <!-- Header Section -->
-    <div class="sticky top-0 z-30 px-4 py-5 glass border-b border-white/5 shadow-2xl">
-        <div class="max-w-md mx-auto flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-xl font-800 tracking-tighter text-white">ARN <span class="text-amber-500">COFFEE</span></h1>
-                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Efficiency Tracker</p>
+    <!-- Reset Confirmation Overlay (custom, replaces browser confirm) -->
+    <div id="reset-overlay" class="reset-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+        <div class="reset-sheet">
+            <p id="reset-title" style="font-size:0.9375rem;font-weight:800;color:#e5e5e5;margin:0 0 8px;">Hapus semua antrian?</p>
+            <p style="font-size:0.8125rem;color:#9ca3af;margin:0 0 24px;line-height:1.5;">Semua jumlah dan status selesai akan direset. Tindakan ini tidak bisa dibatalkan.</p>
+            <div style="display:flex;gap:12px;">
+                <button onclick="cancelReset()" style="flex:1;padding:14px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);color:#d1d5db;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.10)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">Batal</button>
+                <button onclick="confirmReset()" style="flex:1;padding:14px;border-radius:14px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.25);color:#ef4444;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='rgba(239,68,68,0.25)'" onmouseout="this.style.background='rgba(239,68,68,0.15)'">Reset</button>
             </div>
-            <button onclick="resetAll()" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black border border-red-500/20 active:scale-95 transition-all">RESET</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="sticky top-0 z-30 px-4 py-5 glass border-b border-white/5" style="box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+        <div class="max-w-md mx-auto flex justify-between items-center mb-5">
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight text-white" style="letter-spacing:-0.02em;">ARN <span class="text-amber-500">COFFEE</span></h1>
+                <p style="font-size:9px;color:#9ca3af;font-weight:900;text-transform:uppercase;letter-spacing:0.14em;margin-top:2px;">Production Tracker</p>
+            </div>
+            <button class="btn-reset" onclick="requestReset()" aria-label="Reset semua antrian produksi">RESET</button>
         </div>
 
-        <!-- Portafilter & Yield Controls -->
+        <!-- Pulls + Yield -->
         <div class="max-w-md mx-auto grid grid-cols-10 gap-3">
             <!-- Pulls Display -->
-            <div class="col-span-6 accent-gradient rounded-[2rem] p-5 relative overflow-hidden flex flex-col justify-center">
-                <p class="text-[10px] font-black text-amber-950 uppercase opacity-80">Total Espresso Pulls</p>
-                <div class="flex items-baseline gap-2">
-                    <span id="global-pulls" class="text-6xl font-800 text-amber-950 tracking-tighter">0</span>
-                    <span class="text-sm font-black text-amber-900 uppercase">Pulls</span>
+            <div class="col-span-6 accent-gradient relative overflow-hidden flex flex-col justify-center" style="border-radius:2rem;padding:20px;">
+                <p style="font-size:10px;font-weight:900;color:#451a03;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8;margin:0 0 4px;">Total Espresso Pulls</p>
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                    <span id="global-pulls" style="font-size:3.75rem;font-weight:800;color:#451a03;letter-spacing:-0.02em;line-height:1;">0</span>
+                    <span style="font-size:0.875rem;font-weight:900;color:#78350f;text-transform:uppercase;letter-spacing:0.04em;">Pulls</span>
                 </div>
-                <i data-lucide="coffee" class="absolute -right-4 -bottom-4 w-24 h-24 text-amber-950/10 rotate-12"></i>
+                <i data-lucide="coffee" style="position:absolute;right:-16px;bottom:-16px;width:96px;height:96px;color:rgba(69,26,3,0.10);transform:rotate(12deg);"></i>
             </div>
-            
+
             <!-- Yield Stepper -->
-            <div class="col-span-4 bg-white/5 rounded-[2rem] p-3 border border-white/10 flex flex-col items-center justify-between">
-                <p class="text-[9px] font-bold text-gray-500 uppercase">Yield/Shot</p>
-                <button onclick="adjustYield(1)" class="w-full py-2 flex justify-center text-amber-500 active:bg-white/5 rounded-t-xl">
-                    <i data-lucide="chevron-up"></i>
+            <div class="col-span-4 flex flex-col items-center justify-between" style="background:rgba(255,255,255,0.05);border-radius:2rem;padding:12px;border:1px solid rgba(255,255,255,0.10);">
+                <p style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 2px;">Yield/Shot</p>
+                <button class="btn-yield" onclick="adjustYield(1)" aria-label="Tambah yield per shot">
+                    <i data-lucide="chevron-up" style="width:20px;height:20px;"></i>
                 </button>
-                <div class="flex items-center gap-1">
-                    <span id="yield-display" class="text-3xl font-800 text-white">35</span>
-                    <span class="text-[10px] font-bold text-gray-500 italic">g</span>
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <span id="yield-display" style="font-size:1.875rem;font-weight:800;color:#ffffff;line-height:1;">35</span>
+                    <span style="font-size:10px;font-weight:700;color:#9ca3af;font-style:italic;">g</span>
                 </div>
-                <button onclick="adjustYield(-1)" class="w-full py-2 flex justify-center text-amber-500 active:bg-white/5 rounded-b-xl">
-                    <i data-lucide="chevron-down"></i>
+                <button class="btn-yield" onclick="adjustYield(-1)" aria-label="Kurangi yield per shot">
+                    <i data-lucide="chevron-down" style="width:20px;height:20px;"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <main class="px-4 max-w-md mx-auto mt-8 space-y-6">
-        <div id="recipe-list" class="space-y-4">
-            <!-- Render via JS -->
-        </div>
+    <main class="px-4 max-w-md mx-auto mt-8 space-y-5" aria-label="Daftar resep">
+        <div id="recipe-list" class="space-y-4"></div>
 
-        <!-- Total Logistik -->
-        <div class="mt-12 p-8 rounded-[3rem] bg-gradient-to-b from-[#111] to-[#050505] border border-white/5">
-            <h3 class="text-xs font-black mb-8 flex items-center gap-3 text-gray-400 uppercase tracking-widest">
-                <i data-lucide="package" class="w-4 h-4 text-amber-500"></i> Logistik Terakumulasi
-            </h3>
-            <div id="global-ingredients" class="space-y-4">
-                <!-- Render via JS -->
-            </div>
+        <!-- Logistics Panel -->
+        <div class="mt-12 p-8" style="border-radius:3rem;background:linear-gradient(to bottom,#111111,#050505);border:1px solid rgba(255,255,255,0.05);" aria-label="Logistik Terakumulasi">
+            <h2 style="font-size:11px;font-weight:900;color:#9ca3af;text-transform:uppercase;letter-spacing:0.14em;display:flex;align-items:center;gap:12px;margin:0 0 28px;">
+                <i data-lucide="clipboard-list" style="width:16px;height:16px;color:#f59e0b;flex-shrink:0;"></i>
+                Logistik Terakumulasi
+            </h2>
+            <div id="global-ingredients"></div>
         </div>
     </main>
 
     <script>
         const recipes = [
-            { id: 1, name: "Americano Berry", icon: "cherry", esp: 35, berry: 80, air: 50, srp: 15, mth: 0, susu: 0, evap: 0, arn: 0, gul: 0 },
-            { id: 2, name: "Aren Classic", icon: "coffee", esp: 20, susu: 125, evap: 30, arn: 15, air: 0, srp: 0, berry: 0, mth: 0, gul: 0 },
-            { id: 3, name: "Aren Strong", icon: "zap", esp: 35, susu: 120, evap: 20, arn: 15, air: 0, srp: 0, berry: 0, mth: 0, gul: 0 },
-            { id: 4, name: "Butterscotch Classic", icon: "cookie", esp: 20, susu: 125, evap: 30, srp: 15, air: 0, arn: 0, berry: 0, mth: 0, gul: 0 },
-            { id: 5, name: "Matcha Latte", icon: "leaf", mth: 20, air: 30, susu: 110, evap: 20, gul: 10, esp: 0, srp: 0, arn: 0, berry: 0 }
+            { id: 1, name: "Americano Berry",       icon: "cherry",  esp: 35, berry: 80, air: 50, srp: 15, mth: 0,  susu: 0,   evap: 0,  arn: 0,  gul: 0,  krim: 0  },
+            { id: 2, name: "Aren Classic",           icon: "coffee",  esp: 20, susu: 125, evap: 30, arn: 15, air: 0,  srp: 0,   berry: 0, mth: 0,  gul: 0,  krim: 0  },
+            { id: 3, name: "Aren Strong",            icon: "zap",     esp: 35, susu: 120, evap: 20, arn: 15, air: 0,  srp: 0,   berry: 0, mth: 0,  gul: 0,  krim: 0  },
+            { id: 4, name: "Butterscotch Classic",   icon: "cookie",  esp: 20, susu: 125, evap: 30, srp: 15, air: 0,  arn: 0,  berry: 0, mth: 0,  gul: 0,  krim: 0  },
+            { id: 5, name: "Butterscotch Strong",    icon: "flame",   esp: 35, susu: 100, krim: 45,  srp: 15, evap: 0,  arn: 0,  air: 0,  berry: 0, mth: 0,  gul: 0   },
+            { id: 6, name: "Matcha Latte",           icon: "leaf",    mth: 20, air: 30, susu: 110, evap: 20, gul: 10, esp: 0,  srp: 0,   arn: 0,  berry: 0, krim: 0  }
         ];
 
-        let orders = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-        let completed = { 1: false, 2: false, 3: false, 4: false, 5: false };
+        let orders    = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        let completed = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
         let yieldValue = 35;
 
+        // ── Yield ──────────────────────────────────────────────────────────────
         function adjustYield(delta) {
-            // Membatasi range yield agar logis (misal 30g sampai 45g)
             yieldValue = Math.min(Math.max(yieldValue + delta, 30), 45);
-            document.getElementById('yield-display').innerText = yieldValue;
+            document.getElementById('yield-display').textContent = yieldValue;
             render();
         }
 
+        // ── Qty ────────────────────────────────────────────────────────────────
         function updateQty(id, delta) {
             orders[id] = Math.max(0, orders[id] + delta);
-            if (delta > 0) completed[id] = false; 
+            if (delta > 0) completed[id] = false;
             render();
         }
 
+        // ── Done ───────────────────────────────────────────────────────────────
         function toggleDone(id) {
             if (orders[id] === 0) return;
             completed[id] = !completed[id];
             render();
         }
 
-        function resetAll() {
-            if(confirm("Hapus semua antrian produksi?")) {
-                Object.keys(orders).forEach(k => { orders[k] = 0; completed[k] = false; });
-                render();
-            }
+        // ── Reset (custom sheet, no browser confirm) ───────────────────────────
+        function requestReset() {
+            document.getElementById('reset-overlay').style.display = 'flex';
+            // Trap focus inside sheet
+            setTimeout(() => {
+                const btns = document.querySelectorAll('#reset-overlay button');
+                if (btns.length) btns[0].focus();
+            }, 50);
         }
+        function cancelReset() {
+            document.getElementById('reset-overlay').style.display = 'none';
+        }
+        function confirmReset() {
+            document.getElementById('reset-overlay').style.display = 'none';
+            Object.keys(orders).forEach(k => { orders[k] = 0; completed[k] = false; });
+            render();
+        }
+        // Close overlay on backdrop click
+        document.getElementById('reset-overlay').addEventListener('click', function(e) {
+            if (e.target === this) cancelReset();
+        });
 
+        // ── Ingredient color map ───────────────────────────────────────────────
+        const INGREDIENT_COLOR = {
+            'Espresso':      '#ffffff',
+            'Susu Fresh':    '#ffffff',
+            'Susu Evap':     '#ffffff',
+            'Krimer':        '#fde68a',
+            'Gula Aren':     '#f59e0b',
+            'Syrup':         '#c084fc',
+            'Matcha Powder': '#22c55e',
+            'Berry Juice':   '#ec4899',
+            'Gula Pasir':    '#ffffff',
+            'Air Hangat':    '#60a5fa',
+            'Air Biasa':     '#60a5fa',
+        };
+
+        // ── Render ─────────────────────────────────────────────────────────────
         function render() {
             const listEl = document.getElementById('recipe-list');
             let globalEspresso = 0, globalTotalPulls = 0;
-            let inv = { "Espresso": 0, "Susu Fresh": 0, "Susu Evap": 0, "Gula Aren": 0, "Syrup": 0, "Matcha Powder": 0, "Berry Juice": 0, "Gula Pasir": 0, "Air Hangat": 0, "Air Biasa": 0 };
+            let inv = {
+                "Espresso": 0, "Susu Fresh": 0, "Susu Evap": 0,
+                "Krimer": 0, "Gula Aren": 0, "Syrup": 0, "Matcha Powder": 0,
+                "Berry Juice": 0, "Gula Pasir": 0, "Air Hangat": 0, "Air Biasa": 0
+            };
 
             listEl.innerHTML = recipes.map(r => {
-                const qty = orders[r.id];
+                const qty    = orders[r.id];
                 const isDone = completed[r.id];
                 const active = qty > 0;
-                
-                const bEsp = r.esp * qty;
+
+                const bEsp   = r.esp * qty;
                 const bPulls = Math.ceil(bEsp / yieldValue);
 
                 if (active && !isDone) {
-                    globalEspresso += bEsp;
-                    globalTotalPulls += bPulls;
-                    inv["Espresso"] += bEsp;
-                    inv["Susu Fresh"] += r.susu * qty;
-                    inv["Susu Evap"] += r.evap * qty;
-                    inv["Gula Aren"] += r.arn * qty;
-                    inv["Syrup"] += r.srp * qty;
+                    globalEspresso    += bEsp;
+                    globalTotalPulls  += bPulls;
+                    inv["Espresso"]   += bEsp;
+                    inv["Susu Fresh"] += r.susu  * qty;
+                    inv["Susu Evap"]  += r.evap  * qty;
+                    inv["Krimer"]     += r.krim  * qty;
+                    inv["Gula Aren"]  += r.arn   * qty;
+                    inv["Syrup"]      += r.srp   * qty;
                     inv["Matcha Powder"] += r.mth * qty;
                     inv["Berry Juice"] += r.berry * qty;
-                    inv["Gula Pasir"] += r.gul * qty;
-                    if(r.id === 5) inv["Air Hangat"] += r.air * qty;
-                    if(r.id === 1) inv["Air Biasa"] += r.air * qty;
+                    inv["Gula Pasir"]  += r.gul  * qty;
+                    if (r.id === 5) inv["Air Hangat"] += r.air * qty;
+                    if (r.id === 1) inv["Air Biasa"]  += r.air * qty;
                 }
+
+                const iconColor = active ? '#451a03' : '#6b7280';
+                const iconBg    = active
+                    ? 'background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);'
+                    : 'background:rgba(255,255,255,0.05);';
+
+                const metaText  = r.esp > 0 ? `${r.esp}g ESP` : 'NON-COFFEE';
+
+                // Build ingredient cells
+                const cells = [];
+                if (r.esp  > 0) cells.push(['Espresso',      `${bEsp}g`, true, bPulls]);
+                if (r.susu > 0) cells.push(['Susu Fresh',    `${r.susu*qty}g`]);
+                if (r.evap > 0) cells.push(['Susu Evap',     `${r.evap*qty}g`]);
+                if (r.krim > 0) cells.push(['Krimer',         `${r.krim*qty}g`]);
+                if (r.arn  > 0) cells.push(['Gula Aren',     `${r.arn*qty}g`]);
+                if (r.srp  > 0) cells.push(['Syrup',         `${r.srp*qty}g`]);
+                if (r.berry> 0) cells.push(['Berry Juice',   `${r.berry*qty}g`]);
+                if (r.mth  > 0) cells.push(['Matcha',        `${r.mth*qty}g`]);
+                if (r.air  > 0) cells.push([r.id===5?'Air Hangat':'Air', `${r.air*qty}g`]);
+                if (r.gul  > 0) cells.push(['Gula Pasir',    `${r.gul*qty}g`]);
+
+                const cellsHTML = cells.map(([label, val, isEsp, pulls]) => {
+                    const colorKey = label === 'Air Hangat' || label === 'Air' ? (r.id===5?'Air Hangat':'Air Biasa') : label;
+                    const color = INGREDIENT_COLOR[colorKey] || '#ffffff';
+                    const pullsTag = isEsp && pulls > 0
+                        ? `<small style="color:#f59e0b;font-size:0.75rem;font-weight:700;"> (${pulls}P)</small>`
+                        : '';
+                    return `
+                        <div class="detail-grid-item" style="padding:12px;border-radius:14px;" role="group" aria-label="${label}: ${val}">
+                            <p style="font-size:10px;color:#9ca3af;font-weight:900;text-transform:uppercase;letter-spacing:0.10em;margin:0 0 4px;">${label}</p>
+                            <p style="font-size:0.9375rem;font-weight:700;color:${color};margin:0;">${val}${pullsTag}</p>
+                        </div>`;
+                }).join('');
+
+                const doneLabel = isDone ? 'SELESAI' : 'TANDAI SELESAI';
+                const doneIcon  = isDone ? 'check-circle' : 'circle';
 
                 return `
                 <div class="${isDone ? 'recipe-done' : ''} transition-all duration-300">
-                    <div class="glass rounded-[2.5rem] p-6 ${active && !isDone ? 'border-amber-500/30' : ''}">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${active ? 'accent-gradient text-amber-950' : 'bg-white/5 text-gray-600'}">
-                                    <i data-lucide="${r.icon}" class="w-5 h-5"></i>
+                    <div class="recipe-card-inner${active && !isDone ? ' is-active' : ''}" style="border-radius:2.5rem;padding:24px;background:rgba(18,18,18,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);">
+                        <div style="display:flex;align-items:center;justify-content:space-between;">
+                            <!-- Identity -->
+                            <div style="display:flex;align-items:center;gap:16px;">
+                                <div style="${iconBg}width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true">
+                                    <i data-lucide="${r.icon}" style="width:20px;height:20px;color:${iconColor};"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-800 text-sm text-white">${r.name}</h3>
-                                    <p class="text-[9px] font-black text-amber-500 uppercase tracking-widest">${r.esp > 0 ? r.esp+'g ESP' : 'NON-COFFEE'}</p>
+                                    <h3 style="font-weight:800;font-size:0.875rem;color:#e5e5e5;margin:0 0 3px;letter-spacing:-0.01em;">${r.name}</h3>
+                                    <p style="font-size:10px;font-weight:900;color:#f59e0b;text-transform:uppercase;letter-spacing:0.12em;margin:0;">${metaText}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4 bg-black/40 rounded-2xl p-1 border border-white/5">
-                                <button onclick="updateQty(${r.id}, -1)" class="w-10 h-10 rounded-xl text-gray-500 flex items-center justify-center font-bold">-</button>
-                                <span class="w-4 text-center font-800 text-amber-500 text-lg">${qty}</span>
-                                <button onclick="updateQty(${r.id}, 1)" class="w-10 h-10 rounded-xl bg-amber-500 text-amber-950 flex items-center justify-center font-black shadow-lg">+</button>
+                            <!-- Stepper -->
+                            <div style="display:flex;align-items:center;gap:4px;background:rgba(0,0,0,0.45);border-radius:14px;padding:4px;border:1px solid rgba(255,255,255,0.06);" role="group" aria-label="Jumlah ${r.name}">
+                                <button class="btn-minus" onclick="updateQty(${r.id}, -1)" aria-label="Kurangi ${r.name}">−</button>
+                                <span style="min-width:28px;text-align:center;font-weight:800;color:#f59e0b;font-size:1.125rem;" aria-live="polite" aria-label="Jumlah">${qty}</span>
+                                <button class="btn-plus" onclick="updateQty(${r.id}, 1)" aria-label="Tambah ${r.name}">+</button>
                             </div>
                         </div>
 
                         ${active ? `
-                        <div class="mt-6 pt-6 border-t border-white/5 animate-in fade-in">
-                            <div class="grid grid-cols-2 gap-2 text-sm mb-4">
-                                ${r.esp > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Espresso</p><p class="font-bold text-white text-base">${bEsp}g <small class="text-amber-500">(${bPulls}P)</small></p></div>` : ''}
-                                ${r.susu > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Susu Fresh</p><p class="font-bold text-white text-base">${r.susu*qty}g</p></div>` : ''}
-                                ${r.evap > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Susu Evap</p><p class="font-bold text-white text-base">${r.evap*qty}g</p></div>` : ''}
-                                ${r.arn > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Gula Aren</p><p class="font-bold text-amber-500 text-base">${r.arn*qty}g</p></div>` : ''}
-                                ${r.srp > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Syrup</p><p class="font-bold text-purple-400 text-base">${r.srp*qty}g</p></div>` : ''}
-                                ${r.berry > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Berry Juice</p><p class="font-bold text-pink-500 text-base">${r.berry*qty}g</p></div>` : ''}
-                                ${r.mth > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Matcha</p><p class="font-bold text-green-500 text-base">${r.mth*qty}g</p></div>` : ''}
-                                ${r.air > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">${r.id === 5 ? 'Air Hangat' : 'Air'}</p><p class="font-bold text-blue-400 text-base">${r.air*qty}g</p></div>` : ''}
-                                ${r.gul > 0 ? `<div class="detail-grid-item p-3 rounded-2xl"><p class="text-[8px] text-gray-500 font-black uppercase">Gula Pasir</p><p class="font-bold text-white text-base">${r.gul*qty}g</p></div>` : ''}
+                        <div class="detail-panel" style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06);">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+                                ${cellsHTML}
                             </div>
-                            <button onclick="toggleDone(${r.id})" class="w-full py-4 rounded-[1.5rem] flex items-center justify-center gap-3 font-black text-[10px] tracking-widest transition-all ${isDone ? 'bg-green-500/20 text-green-500 border border-green-500/20' : 'bg-white/5 text-gray-400 border border-white/10'}">
-                                <i data-lucide="${isDone ? 'check-circle' : 'circle'}" class="w-4 h-4"></i>
-                                ${isDone ? 'COMPLETED' : 'MARK AS DONE'}
+                            <button class="btn-done${isDone ? ' is-done' : ''}" onclick="toggleDone(${r.id})" aria-pressed="${isDone}">
+                                <i data-lucide="${doneIcon}" style="width:16px;height:16px;flex-shrink:0;" aria-hidden="true"></i>
+                                ${doneLabel}
                             </button>
-                        </div>
-                        ` : ''}
+                        </div>` : ''}
                     </div>
-                </div>
-                `;
+                </div>`;
             }).join('');
 
-            document.getElementById('global-pulls').innerText = globalTotalPulls;
-            
+            document.getElementById('global-pulls').textContent = globalTotalPulls;
+
+            // Logistics panel
             const invEl = document.getElementById('global-ingredients');
-            const items = Object.entries(inv).filter(([_, v]) => v > 0);
-            
+            const items = Object.entries(inv).filter(([, v]) => v > 0);
+
             if (items.length === 0) {
-                invEl.innerHTML = `<p class="text-gray-600 text-[10px] italic text-center py-4">BELUM ADA DATA PRODUKSI</p>`;
+                invEl.innerHTML = `<p style="color:#9ca3af;font-size:11px;font-style:italic;text-align:center;padding:16px 0;" role="status">Belum ada data produksi</p>`;
             } else {
-                invEl.innerHTML = items.map(([name, val]) => `
-                    <div class="flex justify-between items-center py-2 border-b border-white/5">
-                        <span class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">${name}</span>
-                        <span class="text-sm font-800 text-white">${val}g</span>
-                    </div>
-                `).join('') + `
-                    <div class="mt-6 p-5 accent-gradient rounded-3xl flex justify-between items-center">
+                invEl.innerHTML = items.map(([name, val]) => {
+                    const color = INGREDIENT_COLOR[name] || '#e5e5e5';
+                    return `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;">${name}</span>
+                        <span style="font-size:0.9375rem;font-weight:800;color:${color};">${val}g</span>
+                    </div>`;
+                }).join('') + `
+                    <div class="accent-gradient" style="margin-top:20px;padding:20px;border-radius:1.5rem;display:flex;justify-content:space-between;align-items:center;">
                         <div>
-                            <p class="text-[9px] font-black text-amber-950 uppercase opacity-70 italic tracking-tighter">Liquid Espresso Required</p>
-                            <p class="text-2xl font-900 text-amber-950">${globalEspresso}g</p>
+                            <p style="font-size:10px;font-weight:900;color:#451a03;text-transform:uppercase;letter-spacing:0.08em;opacity:0.75;margin:0 0 4px;">Liquid Espresso Required</p>
+                            <p style="font-size:1.5rem;font-weight:800;color:#451a03;margin:0;">${globalEspresso}g</p>
                         </div>
-                        <i data-lucide="zap" class="w-8 h-8 text-amber-950/20"></i>
-                    </div>
-                `;
+                        <i data-lucide="zap" style="width:32px;height:32px;color:rgba(69,26,3,0.18);" aria-hidden="true"></i>
+                    </div>`;
             }
+
             lucide.createIcons();
         }
+
         render();
     </script>
 </body>
