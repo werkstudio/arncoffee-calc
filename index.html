@@ -292,7 +292,7 @@
             { id: 3, name: "Aren Strong",            icon: "zap",     customIcon: "assets/001-coffee.svg",    esp: 35, susu: 95,  evap: 0, arn: 15, air: 0,  srp: 0,   berry: 0, mth: 0,  gul: 0,  krim: 15, uht: 30 },
             { id: 4, name: "Butterscotch Classic",   icon: "cookie",  customIcon: "assets/001-coffee.svg",    esp: 20, susu: 110, evap: 0, srp: 15, air: 0,  arn: 0,  berry: 0, mth: 0,  gul: 0,  krim: 15, uht: 30 },
             { id: 5, name: "Butterscotch Strong",    icon: "flame",   customIcon: "assets/001-coffee.svg",    esp: 35, susu: 95,  krim: 15, uht: 30, srp: 15, evap: 0,  arn: 0,  air: 0,  berry: 0, mth: 0,  gul: 0   },
-            { id: 6, name: "Matcha Latte",           icon: "leaf",    customIcon: "assets/001-coffee.svg",    mth: 20, air: 30, susu: 85,  evap: 0, gul: 10, esp: 0,  srp: 0,   arn: 0,  berry: 0, krim: 15, uht: 30 }
+            { id: 6, name: "Matcha Latte",           icon: "leaf",    customIcon: "assets/001-coffee.svg",    mth: 2,  air: 30, susu: 100, evap: 0, gul: 10, esp: 0,  srp: 0,   arn: 0,  berry: 0, krim: 15, uht: 30 }
         ];
 
         let orders    = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
@@ -389,7 +389,7 @@
                     inv["Matcha Powder"] += r.mth * qty;
                     inv["Berry Juice"] += r.berry * qty;
                     inv["Gula Pasir"]  += r.gul  * qty;
-                    if (r.id === 5) inv["Air Hangat"] += r.air * qty;
+                    if (r.id === 5 || r.id === 6) inv["Air Hangat"] += r.air * qty;
                     if (r.id === 1) inv["Air Biasa"]  += r.air * qty;
                 }
 
