@@ -16,7 +16,7 @@ There's nothing to install or build. Open `index.html` directly in a browser (e.
 
 Everything revolves around three global mutable state objects declared in the `<script>` block of `index.html`:
 
-- `recipes` — a fixed array of 6 recipe objects (id, name, icon, and per-cup gram amounts for every possible ingredient field: `esp`, `susu`, `evap`, `arn`, `srp`, `berry`, `mth`, `air`, `gul`, `krim`). Every recipe object sets *all* fields, using `0` for ingredients it doesn't use — this lets `render()` treat the shape uniformly.
+- `recipes` — a fixed array of 7 recipe objects (id, name, icon, and per-cup gram amounts for every possible ingredient field: `esp`, `susu`, `evap`, `arn`, `srp`, `berry`, `mth`, `air`, `gul`, `krim`). Every recipe object sets *all* fields, using `0` for ingredients it doesn't use — this lets `render()` treat the shape uniformly.
 - `orders` — quantity ordered per recipe id (keyed by numeric id as string).
 - `completed` — done/not-done boolean per recipe id.
 - `yieldValue` — grams of espresso per pull, adjustable 30–45, defaults to 35.
@@ -25,7 +25,7 @@ There is no framework and no virtual DOM diffing: every state mutation (`updateQ
 
 Key behaviors to know before editing `render()`:
 - Espresso pulls per recipe are `Math.ceil((esp * qty) / yieldValue)`, and only accumulate into global totals/inventory for recipes that are active (`qty > 0`) and *not* marked done — completing a recipe removes it from all running totals.
-- The `air` ingredient field is shared/overloaded: recipe id 1 (Americano Berry) labels it "Air Biasa" and id 5 (Butterscotch Strong) labels it "Air Hangat" — see the `r.id === 5` / `r.id === 1` branches in `render()`. Any new recipe using `air` needs an explicit branch added there too.
+- The `air` ingredient field is shared/overloaded: recipe id 1 & 7 (Americano Berry & Americano Berry Single Shot) label it "Air Biasa" and id 5 (Butterscotch Strong) labels it "Air Hangat" — see the `r.id === 5` / `r.id === 1 || r.id === 7` branches in `render()`. Any new recipe using `air` needs an explicit branch added there too.
 - `INGREDIENT_COLOR` is a fixed name→hex map used to color-code ingredient values consistently across recipe cards and the logistics panel. See "Ingredient color vocabulary" below before changing or adding colors.
 - State is intentionally **not persisted** (no localStorage/cookies/service worker). This is a deliberate product decision ("reset is safe" — see PRODUCT.md) — do not add persistence.
 - The reset confirmation is a custom bottom-sheet overlay (`#reset-overlay`), not `window.confirm()` — keep it that way; don't reintroduce native dialogs.
